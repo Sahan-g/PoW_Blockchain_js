@@ -33,7 +33,7 @@ class blockchain{
                 return false;
             }
 
-            if (currentBlock.hash !== Block.hashBlock(currentBlock.previousHash, currentBlock.timestamp, currentBlock.data,currentBlock.nonce,currentBlock.difficulty)) {
+            if (currentBlock.hash !== Block.hashBlock(currentBlock.index, currentBlock.previousHash, currentBlock.timestamp, currentBlock.data, currentBlock.nonce, currentBlock.difficulty)) {
                 return false;
             }
         }
