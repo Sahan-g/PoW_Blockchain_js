@@ -6,7 +6,7 @@ const peers = process.env.PEERS ? process.env.PEERS.split(',') : [];
 const MESSAGE_TYPES = {
     chain: 'CHAIN',
     transaction: 'TRANSACTION',
-    clear_transactions: 'CLEAR_TRANSACTIONS'    
+    clear_transactions: 'CLEAR_TRANSACTIONS',
 }
 
 class P2PServer {

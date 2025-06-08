@@ -3,7 +3,8 @@ const ChainUtill = require("../chain-util.js");
 const { DIFFICULTY, MINE_RATE } = require("../config.js");
 
 class Block {
-    constructor(previousHash, timestamp, data, hash, nonce, difficulty) {
+    constructor(index, previousHash, timestamp, data, hash, nonce, difficulty) {
+        this.index = index || 0; // Default index if not provided
         this.previousHash = previousHash;
         this.timestamp = timestamp;
         this.data = data;
@@ -14,6 +15,7 @@ class Block {
 
     toString() {
         return `Block -
+        Index        : ${this.index}
         Previous Hash: ${this.previousHash.substring(0, 10)}...
         Timestamp    : ${this.timestamp}
         Data         : ${this.data}
@@ -53,12 +55,13 @@ class Block {
     const previousHash = previousBlock ? previousBlock.hash : '0';
     let nonce = 0;
     let difficulty = previousBlock ? previousBlock.difficulty : DIFFICULTY;
+    let index = previousBlock ? previousBlock.index + 1 : 0;
 
     do {
         nonce++;
         timestamp = Date.now();
         difficulty = Block.adjustDifficulty(previousBlock, timestamp);
-        hash = Block.hashBlock(previousHash, timestamp, data, nonce, difficulty);
+        hash = Block.hashBlock(index, previousHash, timestamp, data, nonce, difficulty);
     } while (hash.substring(0, difficulty) !== '0'.repeat(difficulty));
 
     if (previousBlock && previousBlock.timestamp != null) {
@@ -68,12 +71,12 @@ class Block {
         }
     }
 
-    return new this(previousHash, timestamp, data, hash, nonce, difficulty);
+    return new this(index, previousHash, timestamp, data, hash, nonce, difficulty);
 }
 
 
-    static hashBlock(previousHash, timestamp, data, nonce, difficulty) {
-        return ChainUtill.hash(`${previousHash} + ${timestamp} + ${data} + ${nonce} + ${difficulty}`);
+    static hashBlock(index,previousHash, timestamp, data, nonce, difficulty) {
+        return ChainUtill.hash(`${index} + ${previousHash} + ${timestamp} + ${data} + ${nonce} + ${difficulty}`);
     }
 
     // static adjustDifficulty(previousBlock, timestamp) {
