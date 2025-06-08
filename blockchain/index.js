@@ -56,6 +56,40 @@ class blockchain{
         console.log('Replacing the current chain with the new chain.');
         this.chain = newChain;
     }
+
+addToChain(block) {
+    const latestBlock = this.getLatestBlock();
+
+    if (this.chain.length === 0 || block.previousHash === latestBlock.hash) {
+        this.chain.push(block);
+        return true;
+    }
+
+    const existingBlock = this.chain[block.index];
+
+    if (existingBlock) {
+        const isHashValid = existingBlock.hash === block.hash;
+        const isPrevHashValid = block.previousHash === this.chain[block.index - 1]?.hash;
+
+        if (isHashValid && isPrevHashValid) {
+            if (block.timestamp < existingBlock.timestamp) {
+                this.chain[block.index] = block;
+                console.log(`Block at index ${block.index} replaced with earlier timestamp.`);
+                return true;
+            } else {
+                console.log(`Received block is valid but newer, ignoring.`);
+                return false;
+            }
+        } else {
+            console.warn(`Hash mismatch or invalid previousHash. Possible fork or attack.`);
+            return false;
+        }
+    }
+
+    console.warn(`Block at index ${block.index} is disconnected or invalid.`);
+    return false;
+}
+
 }
 
 module.exports = blockchain;

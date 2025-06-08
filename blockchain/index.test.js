@@ -195,3 +195,106 @@ describe('replaceChain', () => {
         logSpy.mockRestore();
     });
 });
+describe('addToChain', () => {
+    let Blockchain;
+    let blockchain;
+    let mockGenesisBlock, mockBlock1, mockBlock2, mockEarlierBlock1, mockInvalidBlock;
+
+    beforeEach(() => {
+        Blockchain = require('./index.js');
+        mockGenesisBlock = {
+            index: 0,
+            previousHash: '----',
+            hash: 'genesis-hash',
+            timestamp: 0,
+            data: 'genesis-data',
+            toString: jest.fn(() => 'Genesis Block')
+        };
+        mockBlock1 = {
+            index: 1,
+            previousHash: 'genesis-hash',
+            hash: 'block1-hash',
+            timestamp: 1,
+            data: 'block1-data',
+            toString: jest.fn(() => 'Block 1')
+        };
+        mockBlock2 = {
+            index: 2,
+            previousHash: 'block1-hash',
+            hash: 'block2-hash',
+            timestamp: 2,
+            data: 'block2-data',
+            toString: jest.fn(() => 'Block 2')
+        };
+        mockEarlierBlock1 = {
+            index: 1,
+            previousHash: 'genesis-hash',
+            hash: 'block1-hash',
+            timestamp: 0, // earlier timestamp
+            data: 'block1-data',
+            toString: jest.fn(() => 'Block 1 Earlier')
+        };
+        mockInvalidBlock = {
+            index: 1,
+            previousHash: 'wrong-hash',
+            hash: 'invalid-hash',
+            timestamp: 1,
+            data: 'invalid-data',
+            toString: jest.fn(() => 'Invalid Block')
+        };
+
+        blockchain = new Blockchain();
+        blockchain.chain = [mockGenesisBlock];
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    test('adds block if chain is empty', () => {
+        const emptyChain = new Blockchain();
+        const block = { ...mockGenesisBlock };
+        emptyChain.chain = [];
+        expect(emptyChain.addToChain(block)).toBe(true);
+        expect(emptyChain.chain[0]).toBe(block);
+    });
+
+    test('adds block if previousHash matches latest block hash', () => {
+        expect(blockchain.addToChain(mockBlock1)).toBe(true);
+        expect(blockchain.chain[1]).toBe(mockBlock1);
+    });
+
+    test('replaces block at index with earlier timestamp', () => {
+        blockchain.chain.push(mockBlock1);
+        const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+        expect(blockchain.addToChain(mockEarlierBlock1)).toBe(true);
+        expect(blockchain.chain[1]).toBe(mockEarlierBlock1);
+        expect(logSpy).toHaveBeenCalledWith('Block at index 1 replaced with earlier timestamp.');
+        logSpy.mockRestore();
+    });
+
+    test('does not replace block at index with newer timestamp', () => {
+        blockchain.chain.push({ ...mockBlock1, timestamp: 0 });
+        const newerBlock = { ...mockBlock1, timestamp: 2 };
+        const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+        expect(blockchain.addToChain(newerBlock)).toBe(false);
+        expect(logSpy).toHaveBeenCalledWith('Received block is valid but newer, ignoring.');
+        logSpy.mockRestore();
+    });
+
+    test('returns false and warns if hash or previousHash do not match', () => {
+        blockchain.chain.push(mockBlock1);
+        const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+        expect(blockchain.addToChain(mockInvalidBlock)).toBe(false);
+        expect(warnSpy).toHaveBeenCalledWith('Hash mismatch or invalid previousHash. Possible fork or attack.');
+        warnSpy.mockRestore();
+    });
+
+    test('returns false and warns if block is disconnected or invalid', () => {
+        const disconnectedBlock = { ...mockBlock2, index: 5 };
+        const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+        expect(blockchain.addToChain(disconnectedBlock)).toBe(false);
+        expect(warnSpy).toHaveBeenCalledWith('Block at index 5 is disconnected or invalid.');
+        warnSpy.mockRestore();
+    });
+});

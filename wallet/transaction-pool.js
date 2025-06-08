@@ -42,8 +42,16 @@ class TransactionPool {
       return transaction;
     })
 
+    
 
   }
+
+  removeConfirmedTransactions(confirmedTransactions) {
+    this.transactions = this.transactions.filter(
+        t => !confirmedTransactions.find(ct => ct.id === t.id)
+    );
+}
+
 }
 
 module.exports = TransactionPool;

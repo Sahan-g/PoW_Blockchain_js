@@ -108,6 +108,16 @@ static adjustDifficulty(previousBlock, timestamp) {
     }
 }
 
+static isValidBlock(block) {
+    if (!block) return false;
+    const { index, previousHash, timestamp, data, nonce, difficulty, hash } = block;
+    const validHash = ChainUtill.hash(`${index} + ${previousHash} + ${timestamp} + ${data} + ${nonce} + ${difficulty}`);
+    return (
+        hash === validHash &&
+        hash.substring(0, difficulty) === '0'.repeat(difficulty)
+    );
+}
+
 
 
 }
