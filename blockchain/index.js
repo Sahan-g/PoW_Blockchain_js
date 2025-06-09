@@ -1,6 +1,7 @@
 Block = require('./block.js');
+const db = require('../database');
 
-class blockchain{
+class Blockchain{
     constructor() {
         this.chain = [];
     }
@@ -58,4 +59,4 @@ class blockchain{
     }
 }
 
-module.exports = blockchain;
+module.exports = Blockchain;
