@@ -7,7 +7,8 @@ const MESSAGE_TYPES = {
     chain: 'CHAIN',
     transaction: 'TRANSACTION',
     clear_transactions: 'CLEAR_TRANSACTIONS',
-}
+    block: 'BLOCK'
+};
 
 class P2PServer {
     constructor(blockchain, transactionPool) {
@@ -40,15 +41,21 @@ class P2PServer {
     messageHandler(socket) {
         socket.on('message', message => {
             const data = JSON.parse(message);
-            switch(data.type){
+            switch (data.type) {
                 case MESSAGE_TYPES.chain:
                     this.blockchain.replaceChain(data.chain);
                     break;
                 case MESSAGE_TYPES.transaction:
                     this.transactionPool.updateOrAddTransaction(data.transaction);
                     break;
-                case MESSAGE_TYPES.clear_transactions:
-                    this.transactionPool.clear();
+                // case MESSAGE_TYPES.clear_transactions: will not be using this 
+                //     this.transactionPool.clear();
+                //     break;
+                case MESSAGE_TYPES.block:
+                    const isAdded = this.blockchain.addToChain(data.block);
+                    if (isAdded) {
+                        this.transactionPool.removeConfirmedTransactions(data.block.data);
+                    }
                     break;
                 default:
                     console.error(`Unknown message type: ${data.type}`);
@@ -82,6 +89,12 @@ class P2PServer {
     broadcastClearTransactions() {
         this.sockets.forEach(socket => {
             socket.send(JSON.stringify({ type: MESSAGE_TYPES.clear_transactions }));
+        });
+    }
+
+    broadcastBlock(block) {
+        this.sockets.forEach(socket => {
+            socket.send(JSON.stringify({ type: MESSAGE_TYPES.block, block }));
         });
     }
 }
