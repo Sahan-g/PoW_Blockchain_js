@@ -1,9 +1,29 @@
-Block = require('./block.js');
+const Block = require('./block.js');
+const db = require('../database');
+//const Block = require('./block.js');
 
-class blockchain{
+class Blockchain{
     constructor() {
         this.chain = [];
     }
+
+    
+    static async create() {
+        const blockchain = new Blockchain()
+        let chainFromDB = await db.getChain();
+
+        if(chainFromDB && chainFromDB.length > 0) {
+            console.log('Blockchain loaded from DB');
+            blockchain.chain = chainFromDB.map(blockData => Block.fromObject(blockData))
+        } else {
+            console.log('No blockchain found. Creating genesis block...');
+            const genesisBlock = Block.genesis();
+            blockchain.chain = [genesisBlock];
+            await db.saveChain(blockchain.chain);
+        }
+        return blockchain;
+    }
+
 
     addBlock(data) {
         const previousBlock = this.chain[this.chain.length - 1];
@@ -58,4 +78,4 @@ class blockchain{
     }
 }
 
-module.exports = blockchain;
+module.exports = Blockchain;

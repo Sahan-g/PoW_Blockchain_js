@@ -9,61 +9,66 @@ const PORT= process.env.PORT || 3001;
 
 const app = express();
 
-const bc = new Blockchain();
-const wallet = new Wallet();
-const tp = new TransactionPool();
-const p2pServer = new P2PServer(bc,tp);
-const miner = new Miner(bc, tp, p2pServer, wallet);
+const startServer = async () => {
 
-app.use(bodyParser.json());
+    //const bc = new Blockchain();
+    const bc = await Blockchain.create();
+    const wallet = new Wallet();
+    const tp = new TransactionPool();
+    const p2pServer = new P2PServer(bc,tp);
+    const miner = new Miner(bc, tp, p2pServer, wallet);
 
-app.get('/blocks', (req, res) => {
-    res.json(bc.chain);
-}); 
+    app.use(bodyParser.json());
 
-app.post('/mine', (req, res) => {
-    const data = req.body.data;
-    if (!data) {
-        return res.status(400).send('Data is required to mine a block.');
-    }
-    
-    const newBlock = bc.addBlock(data);
+    app.get('/blocks', (req, res) => {
+        res.json(bc.chain);
+    }); 
 
-    p2pServer.syncChains();
-    res.redirect('/blocks');
-});
+    app.post('/mine', (req, res) => {
+        const data = req.body.data;
+        if (!data) {
+            return res.status(400).send('Data is required to mine a block.');
+        }
+        
+        const newBlock = bc.addBlock(data);
 
-app.get('/mine-transactions', (req, res) => {
-    const block = miner.mine();
-    console.log(`New block mined: ${block.toString()}`);
-    res.redirect('/blocks');
-});
+        p2pServer.syncChains();
+        res.redirect('/blocks');
+    });
 
-app.get('/transaction', (req, res) => {
-    res.json(tp.transactions);
-});
+    app.get('/mine-transactions', (req, res) => {
+        const block = miner.mine();
+        console.log(`New block mined: ${block.toString()}`);
+        res.redirect('/blocks');
+    });
 
-app.post('/transact', (req, res) => {
-    const { recipient, amount } = req.body;
+    app.get('/transaction', (req, res) => {
+        res.json(tp.transactions);
+    });
 
-    if (!recipient || !amount) {
-        return res.status(400).send('Recipient and amount are required.');
-    }
+    app.post('/transact', (req, res) => {
+        const { recipient, amount } = req.body;
 
-    const transaction = wallet.createTransaction(recipient, amount, tp,bc);
-    p2pServer.broadcastTransaction(transaction);
+        if (!recipient || !amount) {
+            return res.status(400).send('Recipient and amount are required.');
+        }
 
-    res.redirect('/transaction');
-});
+        const transaction = wallet.createTransaction(recipient, amount, tp,bc);
+        p2pServer.broadcastTransaction(transaction);
 
-app.get('/public-key', (req, res) => {
-    res.json({ publicKey: wallet.publicKey });
-});
+        res.redirect('/transaction');
+    });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-    console.log('Blockchain:', bc.toString());
-});
+    app.get('/public-key', (req, res) => {
+        res.json({ publicKey: wallet.publicKey });
+    });
 
-p2pServer.listen();
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+        console.log('Blockchain:', bc.toString());
+    });
 
+    p2pServer.listen();
+}
+
+startServer();

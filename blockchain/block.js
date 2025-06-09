@@ -14,21 +14,29 @@ class Block {
     }
 
     toString() {
+        const prevHashStr = String(this.previousHash || '').substring(0, 10) || '----';
+        const hashStr = String(this.hash || '').substring(0, 10) || '----';
         return `Block -
         Index        : ${this.index}
-        Previous Hash: ${this.previousHash.substring(0, 10)}...
+        Previous Hash: ${prevHashStr}...
         Timestamp    : ${this.timestamp}
         Data         : ${this.data}
         Nonce        : ${this.nonce}
         Difficulty   : ${this.difficulty}
-        Hash         : ${this.hash.substring(0, 10)}...`;
-
-
+        Hash         : ${hashStr}...`;
     }
 
     static genesis() {
-        return new this('0', 1465154705, ['Genesis Block'], 'a3c6e4f8b1c2d3e4f5a6b7c8d9e0f1g2h3i4j5k6l7m8n9o0p1q2r3s4t5u6v7w', 1500, DIFFICULTY);
-    }
+        return new this(
+            0,                                      // index
+            '0'.repeat(64),                         // previousHash
+            1465154705,                             // timestamp
+            'Genesis Block',                        // data
+            'a3c6e4f8b1c2...t5u6v7w',               // hash
+            1500,                                   // nonce
+            DIFFICULTY                              // difficulty
+    );
+}
 
     // static mineBlock(previousBlock, data) {
     //     let hash, timestamp;
@@ -108,6 +116,10 @@ static adjustDifficulty(previousBlock, timestamp) {
     }
 }
 
+static fromObject(obj) {
+    const {index, previousHash, timestamp, data, hash, nonce, difficulty} = obj;
+    return new this(index, previousHash, timestamp, data, hash, nonce, difficulty);
+}
 
 
 }
