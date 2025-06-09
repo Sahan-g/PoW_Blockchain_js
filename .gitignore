@@ -31,3 +31,5 @@ build/
 tmp/
 temp/
 
+# Blockchain data
+/chaindata*
