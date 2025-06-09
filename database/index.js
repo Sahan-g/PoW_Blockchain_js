@@ -1,10 +1,11 @@
-const { Level } = require('level');
+
+const {ClassicLevel} = require('classic-level');
 
 const DB_PATH = process.env.DB_PATH || './chaindata';
 
 class BlockchainDB {
     constructor() {
-        this.db = new Level(DB_PATH, {
+        this.db = new ClassicLevel(DB_PATH, {
             valueEncoding: 'json' // automatically handles stringifying and parsing.
         });
     }
@@ -22,7 +23,7 @@ class BlockchainDB {
     async getChain() {
         try {
             const chain = await this.db.get('blockchain');
-            console.log('Blockchain retrieved from DB successfully.');
+            console.log('Loading blockchain from DB...');
             return chain;
 
         } catch (error) {
