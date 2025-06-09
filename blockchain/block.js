@@ -108,6 +108,10 @@ static adjustDifficulty(previousBlock, timestamp) {
     }
 }
 
+static fromObject(obj) {
+    const {index, previousHash, timestamp, data, hash, nonce, difficulty} = obj;
+    return new this(index, previousHash, timestamp, data, hash, nonce, difficulty);
+}
 
 
 }
