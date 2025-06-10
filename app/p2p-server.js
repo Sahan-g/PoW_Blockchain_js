@@ -24,12 +24,36 @@ class P2PServer {
         console.log(`P2P Server listening on port ${P2P_PORT}`);
     }
 
+    // connectToPeers() {
+    //     peers.forEach(peer => {
+    //         const socket = new webSocket(peer);
+    //         socket.on('open', () => this.connectSocket(socket));
+    //     });
+    // }
     connectToPeers() {
-        peers.forEach(peer => {
-            const socket = new webSocket(peer);
-            socket.on('open', () => this.connectSocket(socket));
+        peers.forEach(peer => this.connectToPeer(peer));
+    }
+
+
+    connectToPeer(peer) {
+        const socket = new webSocket(peer);
+
+        socket.on('open', () => {
+            console.log(`Connected to peer ${peer}`);
+            this.connectSocket(socket);
+        });
+
+        socket.on('error', () => {
+            console.log(`Retrying peer ${peer} in 5s...`);
+            setTimeout(() => this.connectToPeer(peer), 5000);
+        });
+
+
+        socket.on('close', () => {
+            console.log(`Connection to peer ${peer} closed`);
         });
     }
+
 
     connectSocket(socket) {
         this.sockets.push(socket);
