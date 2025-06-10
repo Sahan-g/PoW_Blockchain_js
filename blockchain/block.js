@@ -58,28 +58,28 @@ class Block {
     // }
 
     static mineBlock(previousBlock, data) {
-    let hash, timestamp;
+        let hash, timestamp;
 
-    const previousHash = previousBlock ? previousBlock.hash : '0';
-    let nonce = 0;
-    let difficulty = previousBlock ? previousBlock.difficulty : DIFFICULTY;
-    let index = previousBlock ? previousBlock.index + 1 : 0;
+        const previousHash = previousBlock ? previousBlock.hash : '0';
+        let nonce = 0;
+        let difficulty = previousBlock ? previousBlock.difficulty : DIFFICULTY;
+        let index = previousBlock ? previousBlock.index + 1 : 0;
 
-    do {
-        nonce++;
-        timestamp = Date.now();
-        difficulty = Block.adjustDifficulty(previousBlock, timestamp);
-        hash = Block.hashBlock(index, previousHash, timestamp, data, nonce, difficulty);
-    } while (hash.substring(0, difficulty) !== '0'.repeat(difficulty));
+        do {
+            nonce++;
+            timestamp = Date.now();
+            difficulty = Block.adjustDifficulty(previousBlock, timestamp);
+            hash = Block.hashBlock(index, previousHash, timestamp, data, nonce, difficulty);
+        } while (hash.substring(0, difficulty) !== '0'.repeat(difficulty));
 
-    if (previousBlock && previousBlock.timestamp != null) {
-        const mineTime = timestamp - previousBlock.timestamp;
-        if (mineTime < MINE_RATE) {
-            console.log(`Block mined too fast: ${mineTime}ms`);
+        if (previousBlock && previousBlock.timestamp != null) {
+            const mineTime = timestamp - previousBlock.timestamp;
+            if (mineTime < MINE_RATE) {
+                console.log(`Block mined too fast: ${mineTime}ms`);
+            }
         }
-    }
 
-    return new this(index, previousHash, timestamp, data, hash, nonce, difficulty);
+        return new this(index, previousHash, timestamp, data, hash, nonce, difficulty);
 }
 
 

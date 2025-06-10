@@ -73,7 +73,7 @@ const startServer = async () => {
     setInterval(() => {
         const block = miner.mine();
         console.log(`New block mined: ${block.toString()}`);
-    }, 10 * 1000); // 1 minute interval for mining
+    }, 60 * 1000); // 1 minute interval for mining
 }
 
 startServer();
