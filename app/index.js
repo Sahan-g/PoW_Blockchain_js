@@ -69,6 +69,11 @@ const startServer = async () => {
     });
 
     p2pServer.listen();
+
+    setInterval(() => {
+        const block = miner.mine();
+        console.log(`New block mined: ${block.toString()}`);
+    }, 10 * 1000); // 1 minute interval for mining
 }
 
 startServer();
