@@ -31,7 +31,7 @@ class Block {
             0,                                      // index
             '0'.repeat(64),                         // previousHash
             1465154705,                             // timestamp
-            'Genesis Block',                        // data
+            ['Genesis Block'],                        // data
             'a3c6e4f8b1c2...t5u6v7w',               // hash
             1500,                                   // nonce
             DIFFICULTY                              // difficulty
