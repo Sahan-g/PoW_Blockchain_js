@@ -17,8 +17,9 @@ class Blockchain{
             blockchain.chain = chainFromDB.map(blockData => Block.fromObject(blockData))
         } else {
             console.log('No blockchain found. Creating genesis block...');
-            const genesisBlock = Block.genesis();
-            blockchain.chain = [genesisBlock];
+            // const genesisBlock = Block.genesis();
+            // blockchain.chain = [genesisBlock];
+            blockchain.chain = [];
             await db.saveChain(blockchain.chain);
         }
         return blockchain;
