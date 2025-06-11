@@ -26,10 +26,12 @@ class Blockchain{
     }
 
 
-    addBlock(data) {
+    async addBlock(data) {
         const previousBlock = this.chain[this.chain.length - 1];
         const newBlock = Block.mineBlock(previousBlock, data);
         this.chain.push(newBlock);
+        await db.saveChain(this.chain);
+        console.log('New block added and chain saved to DB.');
         console.log(`CREATED  BLOCK ADDED: ${newBlock.toString()}`);
         return newBlock;
     }
@@ -62,7 +64,7 @@ class Blockchain{
         return true;
     }
 
-    replaceChain(newChain) {
+    async replaceChain(newChain) {
         
         console.log(newChain)
         if (newChain.length <= this.chain.length) {
@@ -77,6 +79,8 @@ class Blockchain{
 
         console.log('Replacing the current chain with the new chain.');
         this.chain = newChain;
+        await db.saveChain(this.chain);
+        console.log('Replaced chain and saved it to DB.');
     }
 
     addToChain(block) {
