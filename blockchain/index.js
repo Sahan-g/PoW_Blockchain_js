@@ -1,5 +1,6 @@
 const Block = require('./block.js');
 const db = require('../database');
+const ChainUtill = require('../chain-util.js');
 //const Block = require('./block.js');
 
 class Blockchain{
@@ -94,7 +95,7 @@ class Blockchain{
         const existingBlock = this.chain[block.index]; 
 
         if (existingBlock) {
-            const isHashValid = existingBlock.hash === block.hash;
+            const isHashValid = ChainUtill.hash(block) === block.hash;
             const isPrevHashValid = block.previousHash === this.chain[block.index - 1]?.hash;
             console.log(`EXISTING BLOCK HASH: ${existingBlock.hash}, RECEIVED BLOCK HASH: ${block.hash}`);
             console.log(`EXISTING BLOCK PREV HASH: ${existingBlock.previousHash}, RECEIVED BLOCK PREV HASH: ${block.previousHash}`);
