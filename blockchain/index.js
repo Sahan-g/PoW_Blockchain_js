@@ -79,15 +79,15 @@ class Blockchain{
         this.chain = newChain;
     }
 
-addToChain(block) {
-    const latestBlock = this.getLatestBlock();
-    console.log(this.chain.length)
-    if (this.chain.length === 0 || block.previousHash === latestBlock.hash) {
-        this.chain.push(block);
-        return true;
-    }
+    addToChain(block) {
+        const latestBlock = this.getLatestBlock();
+        console.log(this.chain.length)
+        if (this.chain.length === 0 || block.previousHash === latestBlock.hash) {
+            this.chain.push(block);
+            return true;
+        }
 
-    const existingBlock = this.chain[block.index]; 
+        const existingBlock = this.chain[block.index]; 
 
         if (existingBlock) {
             const isHashValid = existingBlock.hash === block.hash;
