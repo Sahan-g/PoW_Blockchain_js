@@ -88,7 +88,6 @@ class Blockchain{
         console.log(this.chain.length)
         if (this.chain.length === 0 || block.previousHash === latestBlock.hash) {
             this.chain.push(block);
-            console.log("Received block is the latest");
             return true;
         }
 
@@ -100,7 +99,7 @@ class Blockchain{
             console.log(`EXISTING BLOCK HASH: ${existingBlock.hash}, RECEIVED BLOCK HASH: ${block.hash}`);
             console.log(`EXISTING BLOCK PREV HASH: ${existingBlock.previousHash}, RECEIVED BLOCK PREV HASH: ${block.previousHash}`);
 
-            if (isHashValid && isPrevHashValid) {
+            if (isHashValid || isPrevHashValid) {
                 if (block.timestamp < existingBlock.timestamp) {
                     this.chain[block.index] = block;
                     console.log(`Block at index ${block.index} replaced with earlier timestamp.`);

@@ -76,7 +76,6 @@ class P2PServer {
                 //     this.transactionPool.clear();
                 //     break;
                 case MESSAGE_TYPES.block:
-                    console.log(`RECEIVED: ${JSON.stringify(data.block)}`);
                     const isAdded = this.blockchain.addToChain(data.block);
                     if (isAdded) {
                         this.transactionPool.removeConfirmedTransactions(data.block.data);
