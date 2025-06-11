@@ -30,6 +30,7 @@ class Blockchain{
         const previousBlock = this.chain[this.chain.length - 1];
         const newBlock = Block.mineBlock(previousBlock, data);
         this.chain.push(newBlock);
+        console.log(`CREATED  BLOCK ADDED: ${newBlock.toString()}`);
         return newBlock;
     }
 
@@ -78,38 +79,38 @@ class Blockchain{
         this.chain = newChain;
     }
 
-addToChain(block) {
-    const latestBlock = this.getLatestBlock();
+    addToChain(block) {
+        const latestBlock = this.getLatestBlock();
 
-    if (this.chain.length === 0 || block.previousHash === latestBlock.hash) {
-        this.chain.push(block);
-        return true;
-    }
+        if (this.chain.length === 0 || block.previousHash === latestBlock.hash) {
+            this.chain.push(block);
+            return true;
+        }
 
-    const existingBlock = this.chain[block.index];
+        const existingBlock = this.chain[block.index];
 
-    if (existingBlock) {
-        const isHashValid = existingBlock.hash === block.hash;
-        const isPrevHashValid = block.previousHash === this.chain[block.index - 1]?.hash;
+        if (existingBlock) {
+            const isHashValid = existingBlock.hash === block.hash;
+            const isPrevHashValid = block.previousHash === this.chain[block.index - 1]?.hash;
 
-        if (isHashValid && isPrevHashValid) {
-            if (block.timestamp < existingBlock.timestamp) {
-                this.chain[block.index] = block;
-                console.log(`Block at index ${block.index} replaced with earlier timestamp.`);
-                return true;
+            if (isHashValid && isPrevHashValid) {
+                if (block.timestamp < existingBlock.timestamp) {
+                    this.chain[block.index] = block;
+                    console.log(`Block at index ${block.index} replaced with earlier timestamp.`);
+                    return true;
+                } else {
+                    console.log(`Received block is valid but newer, ignoring.`);
+                    return false;
+                }
             } else {
-                console.log(`Received block is valid but newer, ignoring.`);
+                console.warn(`Hash mismatch or invalid previousHash. Possible fork or attack.`);
                 return false;
             }
-        } else {
-            console.warn(`Hash mismatch or invalid previousHash. Possible fork or attack.`);
-            return false;
         }
-    }
 
-    console.warn(`Block at index ${block.index} is disconnected or invalid.`);
-    return false;
-}
+        console.warn(`Block at index ${block.index} is disconnected or invalid.`);
+        return false;
+    }
 
 }
 

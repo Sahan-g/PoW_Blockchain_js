@@ -52,6 +52,7 @@ class P2PServer {
                 //     this.transactionPool.clear();
                 //     break;
                 case MESSAGE_TYPES.block:
+                    console.log(`RECEIVED: ${JSON.stringify(data.block)}`);
                     const isAdded = this.blockchain.addToChain(data.block);
                     if (isAdded) {
                         this.transactionPool.removeConfirmedTransactions(data.block.data);
@@ -96,6 +97,7 @@ class P2PServer {
         this.sockets.forEach(socket => {
             socket.send(JSON.stringify({ type: MESSAGE_TYPES.block, block }));
         });
+        // console.log(`BROADCASTED: ${block.toString()}`);
     }
 }
 
