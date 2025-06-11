@@ -72,11 +72,6 @@ const startServer = async () => {
 
     p2pServer.listen();
 
-    if (bc.chain.length === 0) {
-        const genesisBlock = miner.mine();
-        console.log(`Genesis block mined: ${genesisBlock.toString()}`);
-    }
-
     p2pServer.syncChains();
 
     function getNextIntervalDelay(intervalMs) {
@@ -85,22 +80,22 @@ const startServer = async () => {
         return intervalMs - (now % intervalMs);
     }
 
-    function tryMine() {
+    async function startMine() {
         const now = Date.now();
         console.log("Mining aligned");
         console.log(`Time now: ${now}`);
 
-        const newBlock = miner.mine();
+        const newBlock = await miner.mine();
         lastMinedTimestamp = newBlock.timestamp;
         console.log(`Block mined at: ${newBlock.timestamp}`);
 
         const delay = getNextIntervalDelay(TIME_INTERVAL);
-        setTimeout(tryMine, delay);
+        setTimeout(startMine, delay);
     }
 
-    setTimeout(() => {
+    setTimeout(async () => {
         console.log(`Starting aligned mining every ${TIME_INTERVAL / 1000} seconds...`);
-        tryMine();
+        await startMine();
     }, getNextIntervalDelay(TIME_INTERVAL));
 
 }
