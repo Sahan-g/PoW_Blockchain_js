@@ -17,9 +17,9 @@ class Blockchain{
             blockchain.chain = chainFromDB.map(blockData => Block.fromObject(blockData))
         } else {
             console.log('No blockchain found. Creating genesis block...');
-            // const genesisBlock = Block.genesis();
-            // blockchain.chain = [genesisBlock];
-            blockchain.chain = [];
+            const genesisBlock = Block.genesis();
+            blockchain.chain = [genesisBlock];
+            //blockchain.chain = [];
             await db.saveChain(blockchain.chain);
         }
         return blockchain;
@@ -79,15 +79,15 @@ class Blockchain{
         this.chain = newChain;
     }
 
-    addToChain(block) {
-        const latestBlock = this.getLatestBlock();
+addToChain(block) {
+    const latestBlock = this.getLatestBlock();
+    console.log(this.chain.length)
+    if (this.chain.length === 0 || block.previousHash === latestBlock.hash) {
+        this.chain.push(block);
+        return true;
+    }
 
-        if (this.chain.length === 0 || block.previousHash === latestBlock.hash) {
-            this.chain.push(block);
-            return true;
-        }
-
-        const existingBlock = this.chain[block.index];
+    const existingBlock = this.chain[block.index]; 
 
         if (existingBlock) {
             const isHashValid = existingBlock.hash === block.hash;
