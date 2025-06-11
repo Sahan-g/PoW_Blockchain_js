@@ -5,6 +5,8 @@ const P2PServer = require('./p2p-server');
 const Wallet = require('../wallet');
 const TransactionPool = require('../wallet/transaction-pool');
 const Miner = require('./miner');
+const {TIME_INTERVAL} = require('../config');
+
 const PORT= process.env.PORT || 3001;
 
 const app = express();
@@ -69,6 +71,33 @@ const startServer = async () => {
     });
 
     p2pServer.listen();
+
+    p2pServer.syncChains();
+
+    function getNextIntervalDelay(intervalMs) {
+        const now = Date.now();
+        console.log(`Time intto wait: ${intervalMs - (now % intervalMs)}`);
+        return intervalMs - (now % intervalMs);
+    }
+
+    async function startMine() {
+        const now = Date.now();
+        console.log("Mining aligned");
+        console.log(`Time now: ${now}`);
+
+        const newBlock = await miner.mine();
+        lastMinedTimestamp = newBlock.timestamp;
+        console.log(`Block mined at: ${newBlock.timestamp}`);
+
+        const delay = getNextIntervalDelay(TIME_INTERVAL);
+        setTimeout(startMine, delay);
+    }
+
+    setTimeout(async () => {
+        console.log(`Starting aligned mining every ${TIME_INTERVAL / 1000} seconds...`);
+        await startMine();
+    }, getNextIntervalDelay(TIME_INTERVAL));
+
 }
 
 startServer();

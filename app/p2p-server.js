@@ -120,6 +120,7 @@ class P2PServer {
         this.sockets.forEach(socket => {
             socket.send(JSON.stringify({ type: MESSAGE_TYPES.block, block }));
         });
+        // console.log(`BROADCASTED: ${block.toString()}`);
     }
 }
 

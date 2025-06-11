@@ -32,6 +32,7 @@ class Blockchain{
         this.chain.push(newBlock);
         await db.saveChain(this.chain);
         console.log('New block added and chain saved to DB.');
+        console.log(`CREATED  BLOCK ADDED: ${newBlock.toString()}`);
         return newBlock;
     }
 
@@ -82,38 +83,40 @@ class Blockchain{
         console.log('Replaced chain and saved it to DB.');
     }
 
-addToChain(block) {
-    const latestBlock = this.getLatestBlock();
-    console.log(this.chain.length)
-    if (this.chain.length === 0 || block.previousHash === latestBlock.hash) {
-        this.chain.push(block);
-        return true;
-    }
+    addToChain(block) {
+        const latestBlock = this.getLatestBlock();
+        console.log(this.chain.length)
+        if (this.chain.length === 0 || block.previousHash === latestBlock.hash) {
+            this.chain.push(block);
+            return true;
+        }
 
-    const existingBlock = this.chain[block.index]; 
+        const existingBlock = this.chain[block.index]; 
 
-    if (existingBlock) {
-        const isHashValid = existingBlock.hash === block.hash;
-        const isPrevHashValid = block.previousHash === this.chain[block.index - 1]?.hash;
+        if (existingBlock) {
+            const isHashValid = existingBlock.hash === block.hash;
+            const isPrevHashValid = block.previousHash === this.chain[block.index - 1]?.hash;
+            console.log(`EXISTING BLOCK HASH: ${existingBlock.hash}, RECEIVED BLOCK HASH: ${block.hash}`);
+            console.log(`EXISTING BLOCK PREV HASH: ${existingBlock.previousHash}, RECEIVED BLOCK PREV HASH: ${block.previousHash}`);
 
-        if (isHashValid && isPrevHashValid) {
-            if (block.timestamp < existingBlock.timestamp) {
-                this.chain[block.index] = block;
-                console.log(`Block at index ${block.index} replaced with earlier timestamp.`);
-                return true;
+            if (isHashValid || isPrevHashValid) {
+                if (block.timestamp < existingBlock.timestamp) {
+                    this.chain[block.index] = block;
+                    console.log(`Block at index ${block.index} replaced with earlier timestamp.`);
+                    return true;
+                } else {
+                    console.log(`Received block is valid but newer, ignoring.`);
+                    return false;
+                }
             } else {
-                console.log(`Received block is valid but newer, ignoring.`);
+                console.warn(`Hash mismatch or invalid previousHash. Possible fork or attack.`);
                 return false;
             }
-        } else {
-            console.warn(`Hash mismatch or invalid previousHash. Possible fork or attack.`);
-            return false;
         }
-    }
 
-    console.warn(`Block at index ${block.index} is disconnected or invalid.`);
-    return false;
-}
+        console.warn(`Block at index ${block.index} is disconnected or invalid.`);
+        return false;
+    }
 
 }
 
