@@ -35,6 +35,30 @@ class BlockchainDB {
             throw error;
         }
     }
+    
+    async saveWalletKey(privateKey) {
+        try {
+            await this.db.put('wallet_key', privateKey);
+            console.log('Wallet key saved to DB.');
+        } catch (error) {
+            console.error('Failed to save wallet key:', error);
+        }
+    }
+
+    
+    async getWalletKey() {
+        try {
+            const privateKey = await this.db.get('wallet_key');
+            console.log('Loading wallet key from DB...');
+            return privateKey;
+        } catch (error) {
+            if (error.code === 'LEVEL_NOT_FOUND') {
+                return null; // Key doesn't exist, which is fine on first startup
+            }
+            console.error('Failed to retrieve wallet key:', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = new BlockchainDB();
