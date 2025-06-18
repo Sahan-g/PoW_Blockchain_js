@@ -95,7 +95,7 @@ class Blockchain{
         const existingBlock = this.chain[block.index]; 
 
         if (existingBlock) {
-            const isHashValid = ChainUtill.hash(block) === block.hash;
+            const isHashValid = Block.isValidBlock(block);
             const isPrevHashValid = block.previousHash === this.chain[block.index - 1]?.hash;
             console.log(`EXISTING BLOCK HASH: ${existingBlock.hash}, RECEIVED BLOCK HASH: ${block.hash}`);
             console.log(`EXISTING BLOCK PREV HASH: ${existingBlock.previousHash}, RECEIVED BLOCK PREV HASH: ${block.previousHash}`);
