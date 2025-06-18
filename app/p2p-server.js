@@ -25,7 +25,7 @@ class P2PServer {
         const server = new webSocket.Server({ port: P2P_PORT });
         server.on('connection', socket => this.connectSocket(socket));
         // this.connectToPeers();
-        this.registerToBootstrap();
+        await this.registerToBootstrap();
         console.log(`P2P Server listening on port ${P2P_PORT}`);
     }
 
