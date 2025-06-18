@@ -17,6 +17,7 @@ app.post('/register', (req, res) => {
 });
 
 app.get('/peers', (req, res) => {
+    console.log(`Fetching registered peers ${peers}`);
     res.json(peers);
 });
 
