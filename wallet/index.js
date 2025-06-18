@@ -1,12 +1,37 @@
 const { INITIAL_BALANCE } = require('../config');
 const Transaction = require('./transaction')
 const ChainUtill = require('../chain-util');
+const db = require('../database');
 
 class Wallet {
+    // The constructor now just sets up a placeholder.
+    // The real initialization happens in loadOrCreate()
     constructor() {
         this.balance = INITIAL_BALANCE;
-        this.keyPair = ChainUtill.genKeyPair();
-        this.publicKey = this.keyPair.getPublic().encode('hex');
+        this.keyPair = null;
+        this.publicKey = null;
+    } // 
+
+    static async loadOrCreate() {
+        const wallet = new Wallet();
+        let privateKey = await db.getWalletKey();
+
+        if (privateKey) {
+            // If key exists, reconstruct the keyPair from the private key string.
+            wallet.keyPair = ChainUtill.ec.keyFromPrivate(privateKey, 'hex');
+            console.log('Wallet loaded from saved key.');
+        } else {
+            // If no key exists, generate a new one.
+            wallet.keyPair = ChainUtill.genKeyPair();
+            privateKey = wallet.keyPair.getPrivate('hex');
+
+            await db.saveWalletKey(privateKey);
+            console.log('New wallet created and key saved.');
+        }
+
+        // In either case, set the public key from the final keyPair.
+        wallet.publicKey = wallet.keyPair.getPublic().encode('hex');
+        return wallet;
     }
 
     toString() {
@@ -71,7 +96,9 @@ class Wallet {
 
     static blockchainWallet() {
         const blockchainWallet = new this();
-        blockchainWallet.address = 'blockchain-wallet';
+        // blockchainWallet.address = 'blockchain-wallet'; - unnecessary. public key serves as address
+        blockchainWallet.keyPair = ChainUtill.genKeyPair();
+        blockchainWallet.publicKey = blockchainWallet.keyPair.getPublic().encode('hex');
         return blockchainWallet;
     }
 }

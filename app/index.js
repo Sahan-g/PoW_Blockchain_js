@@ -15,7 +15,8 @@ const startServer = async () => {
 
     //const bc = new Blockchain();
     const bc = await Blockchain.create();
-    const wallet = new Wallet();
+    // load wallet from db instead of creating a new instance everytime
+    const wallet = await Wallet.loadOrCreate();
     const tp = new TransactionPool();
     const p2pServer = new P2PServer(bc,tp);
     const miner = new Miner(bc, tp, p2pServer, wallet);
@@ -76,7 +77,7 @@ const startServer = async () => {
 
     function getNextIntervalDelay(intervalMs) {
         const now = Date.now();
-        console.log(`Time intto wait: ${intervalMs - (now % intervalMs)}`);
+        console.log(`Time to wait: ${intervalMs - (now % intervalMs)}`);
         return intervalMs - (now % intervalMs);
     }
 

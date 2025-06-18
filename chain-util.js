@@ -22,5 +22,5 @@ class ChainUtill{
     }
 
 }
-
+ChainUtill.ec = ec; // exposing ec instance so Wallet can reconstruct key
 module.exports = ChainUtill;
