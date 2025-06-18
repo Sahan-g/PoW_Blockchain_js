@@ -27,9 +27,9 @@ class Blockchain{
     }
 
 
-    async addBlock(data) {
+    async addBlock(data, publicKey) {
         const previousBlock = this.chain[this.chain.length - 1];
-        const newBlock = Block.mineBlock(previousBlock, data);
+        const newBlock = Block.mineBlock(previousBlock, data, publicKey);
         this.chain.push(newBlock);
         await db.saveChain(this.chain);
         console.log('New block added and chain saved to DB.');

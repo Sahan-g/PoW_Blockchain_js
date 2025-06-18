@@ -12,7 +12,7 @@ class Miner{
     async mine() {
        const validTransactions = this.transactionPool.validTransactions();
        validTransactions.push(Transaction.rewardTransaction(this.wallet,Wallet.blockchainWallet()));
-       const block= await this.blockchain.addBlock(validTransactions);
+       const block= await this.blockchain.addBlock(validTransactions, this.wallet.publicKey);
        //this.p2pServer.syncChains();
        this.p2pServer.broadcastBlock(block);
        this.transactionPool.clear();

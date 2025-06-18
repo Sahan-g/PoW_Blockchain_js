@@ -33,7 +33,7 @@ const startServer = async () => {
             return res.status(400).send('Data is required to mine a block.');
         }
         
-        const newBlock = bc.addBlock(data);
+        const newBlock = bc.addBlock(data, this.wallet.publicKey);
 
         p2pServer.syncChains();
         res.redirect('/blocks');
