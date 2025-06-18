@@ -76,7 +76,7 @@ const startServer = async () => {
 
     function getNextIntervalDelay(intervalMs) {
         const now = Date.now();
-        console.log(`Time intto wait: ${intervalMs - (now % intervalMs)}`);
+        console.log(`Time to wait: ${intervalMs - (now % intervalMs)}`);
         return intervalMs - (now % intervalMs);
     }
 
