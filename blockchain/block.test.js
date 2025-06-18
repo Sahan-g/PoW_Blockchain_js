@@ -28,21 +28,21 @@ describe('Block', () => {
         it('should return a Block instance', () => {
             const previousBlock = Block.genesis();
             const data = 'block-data';
-            const block = Block.mineBlock(previousBlock, data);
+            const block = Block.mineBlock(previousBlock, data, publicKey);
             expect(block).toBeInstanceOf(Block);
         });
 
         it('should set previousHash to previous block\'s hash', () => {
             const previousBlock = Block.genesis();
             const data = 'block-data';
-            const block = Block.mineBlock(previousBlock, data);
+            const block = Block.mineBlock(previousBlock, data, publicKey);
             expect(block.previousHash).toBe(previousBlock.hash);
         });
 
         it('should set data to the provided data', () => {
             const previousBlock = Block.genesis();
             const data = 'block-data';
-            const block = Block.mineBlock(previousBlock, data);
+            const block = Block.mineBlock(previousBlock, data, publicKey);
             expect(block.data).toBe(data);
         });
 

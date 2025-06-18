@@ -3,7 +3,7 @@ const ChainUtill = require("../chain-util.js");
 const { DIFFICULTY, MINE_RATE } = require("../config.js");
 
 class Block {
-    constructor(index, previousHash, timestamp, data, hash, nonce, difficulty) {
+    constructor(index, previousHash, timestamp, data, hash, nonce, difficulty, minerNodePublicKey) {
         this.index = index || 0; // Default index if not provided
         this.previousHash = previousHash;
         this.timestamp = timestamp;
@@ -11,6 +11,7 @@ class Block {
         this.hash = hash;
         this.nonce = nonce || 0;
         this.difficulty = difficulty || DIFFICULTY; // Default difficulty if not provided
+        this.minerNodePublicKey = minerNodePublicKey;
     }
 
     toString() {
@@ -23,7 +24,8 @@ class Block {
         Data         : ${this.data}
         Nonce        : ${this.nonce}
         Difficulty   : ${this.difficulty}
-        Hash         : ${hashStr}...`;
+        Hash         : ${hashStr}...
+        Miner node public key : ${this.minerNodePublicKey}`;
     }
 
     //     static genesis() {
@@ -89,7 +91,8 @@ class Block {
         ], // data
         '0000ed9e07bf3d957688ed7ac3b93aa78c24afaad55056818faab9f03be9aaec', // hash
         89701, // nonce
-        4 // difficulty
+        4 ,// difficulty,
+        "GENESIS"
     );
 }
 
@@ -114,7 +117,7 @@ class Block {
     //     return new this(previousHash, timestamp, data, hash, nonce, difficulty);
     // }
 
-    static mineBlock(previousBlock, data) {
+    static mineBlock(previousBlock, data , publicKey) {
         let hash, timestamp;
 
         const previousHash = previousBlock ? previousBlock.hash : '0';
@@ -136,7 +139,7 @@ class Block {
             }
         }
 
-        return new this(index, previousHash, timestamp, data, hash, nonce, difficulty);
+        return new this(index, previousHash, timestamp, data, hash, nonce, difficulty, publicKey);
     }
 
 
@@ -185,8 +188,8 @@ class Block {
     }
 
     static fromObject(obj) {
-        const { index, previousHash, timestamp, data, hash, nonce, difficulty } = obj;
-        return new this(index, previousHash, timestamp, data, hash, nonce, difficulty);
+        const { index, previousHash, timestamp, data, hash, nonce, difficulty , minerNodePublicKey} = obj;
+        return new this(index, previousHash, timestamp, data, hash, nonce, difficulty, minerNodePublicKey);
     }
 
 

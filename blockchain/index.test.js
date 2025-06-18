@@ -13,7 +13,7 @@ describe('Blockchain', () => {
         mockNewBlock = { toString: jest.fn(() => 'New Block') };
 
         Block.genesis.mockReturnValue(mockGenesisBlock);
-        Block.mineBlock.mockImplementation((prevBlock, data) => mockNewBlock);
+        Block.mineBlock.mockImplementation((prevBlock, data, publicKey) => mockNewBlock);
 
         blockchain = new Blockchain();
     });
@@ -30,7 +30,8 @@ describe('Blockchain', () => {
 
     test('addBlock adds a new block to the chain', () => {
         const data = 'test-data';
-        const newBlock = blockchain.addBlock(data);
+        const publicKey = "123232fdsf34dfs3dsfs"
+        const newBlock = blockchain.addBlock(data, publicKey);
 
         expect(Block.mineBlock).toHaveBeenCalledWith(mockGenesisBlock, data);
         expect(blockchain.chain.length).toBe(2);
@@ -39,12 +40,12 @@ describe('Blockchain', () => {
     });
 
     test('getLatestBlock returns the last block', () => {
-        blockchain.addBlock('data1');
+        blockchain.addBlock('data1', "sdfd23fw797shd");
         expect(blockchain.getLatestBlock()).toBe(mockNewBlock);
     });
 
     test('toString returns string representation of the chain', () => {
-        blockchain.addBlock('data1');
+        blockchain.addBlock('data1', "sdfd23fw797shd");
         const result = blockchain.toString();
         expect(mockGenesisBlock.toString).toHaveBeenCalled();
         expect(mockNewBlock.toString).toHaveBeenCalled();
