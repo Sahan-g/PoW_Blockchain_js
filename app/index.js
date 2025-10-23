@@ -7,6 +7,8 @@ const TransactionPool = require('../wallet/transaction-pool');
 const Miner = require('./miner');
 const {TIME_INTERVAL} = require('../config');
 
+const ENABLE_SENSOR_SIM = process.env.ENABLE_SENSOR_SIM || false;
+
 const PORT= process.env.PORT || 3001;
 
 const app = express();
@@ -19,7 +21,7 @@ const startServer = async () => {
     const wallet = await Wallet.loadOrCreate();
     const tp = new TransactionPool();
     const p2pServer = new P2PServer(bc,tp);
-    const miner = new Miner(bc, tp, p2pServer, wallet);
+    const miner = new Miner(bc, p2pServer, wallet);
 
     app.use(bodyParser.json());
 
@@ -49,18 +51,43 @@ const startServer = async () => {
         res.json(tp.transactions);
     });
 
-    app.post('/transact', (req, res) => {
-        const { recipient, amount } = req.body;
+  app.post("/transact", (req, res) => {
+    try {
+        console.log(req)
+      const { sensor_id, reading, metadata } = req.body;
 
-        if (!recipient || !amount) {
-            return res.status(400).send('Recipient and amount are required.');
-        }
+      // Basic validation
+      if (!sensor_id || typeof sensor_id !== "string") {
+        return res
+          .status(400)
+          .json({ ok: false, error: "sensor_id is required (string)" });
+      }
+      if (!reading || typeof reading !== "object" || Array.isArray(reading)) {
+        return res
+          .status(400)
+          .json({ ok: false, error: "reading must be a non-null object" });
+      }
+      if (
+        metadata != null &&
+        (typeof metadata !== "object" || Array.isArray(metadata))
+      ) {
+        return res
+          .status(400)
+          .json({ ok: false, error: "metadata must be an object if provided" });
+      }
 
-        const transaction = wallet.createTransaction(recipient, amount, tp,bc);
-        p2pServer.broadcastTransaction(transaction);
+      const tx = wallet.createTransaction(sensor_id, reading, tp, metadata);
+      p2pServer.transactionPool.updateOrAddTransaction(tx);
+      p2pServer.broadcastTransaction(tx);
 
-        res.redirect('/transaction');
-    });
+      return res.status(201).json({ ok: true, transaction: tx });
+    } catch (err) {
+      console.error("Failed to create transaction:", err);
+      return res
+        .status(500)
+        .json({ ok: false, error: err.message || "internal error" });
+    }
+  });
 
     app.get('/public-key', (req, res) => {
         res.json({ publicKey: wallet.publicKey });
@@ -86,13 +113,35 @@ const startServer = async () => {
         console.log("Mining aligned");
         console.log(`Time now: ${now}`);
 
-        const newBlock = await miner.mine();
+        const newBlock = await miner.mine(tp);
         lastMinedTimestamp = newBlock.timestamp;
         console.log(`Block mined at: ${newBlock.timestamp}`);
 
         const delay = getNextIntervalDelay(TIME_INTERVAL);
         setTimeout(startMine, delay);
     }
+    
+  function generateAndSendSensorData() {
+    sensor_id = "sensor-" + Math.floor(Math.random() * 1000);
+    reading = {
+      value: parseFloat((Math.random() * 100).toFixed(2)),
+    };
+    metadata = {
+        timestamp: Date.now(),
+        unit: "Celsius"
+    };
+
+    const tx = wallet.createTransaction(sensor_id, reading, tp, metadata);
+    p2pServer.broadcastTransaction(tx);
+    tp.transactions.push(tx);
+    console.log(
+      "✨: Generated and broadcasted sensor data related to sensor-id: ",
+      sensor_id
+    );
+  }
+
+  ENABLE_SENSOR_SIM ? setInterval(generateAndSendSensorData, 10000) : console.log("❌ Sensor data simulation disabled");
+
 
     setTimeout(async () => {
         console.log(`Starting aligned mining every ${TIME_INTERVAL / 1000} seconds...`);
