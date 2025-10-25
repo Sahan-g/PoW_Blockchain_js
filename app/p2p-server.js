@@ -2,8 +2,10 @@ const webSocket = require('ws');
 const axios = require('axios');
 
 const P2P_PORT = process.env.P2P_PORT || 5001;
-const selfAddress = `ws://localhost:${P2P_PORT}`;
-
+const BOOTSTRAP_ADDRESS =
+  process.env.BOOTSTRAP_ADDRESS || "http://127.0.0.1:4000";
+const P2P_HOST = process.env.P2P_HOST || "localhost";
+const selfAddress = `ws://${P2P_HOST}:${P2P_PORT}`;
 // const peers = process.env.PEERS ? process.env.PEERS.split(',') : [];
 let peers = [];
 
@@ -48,23 +50,29 @@ class P2PServer {
     }
 
     async registerToBootstrap() {
-
-        try{
-            await axios.post(`http://localhost:4000/register`, { address: selfAddress });
-            console.log(`Registered peer with bootsrap as ${selfAddress}`);
-        } catch (error) {
-            console.error(`Error registering peer: ${error.message}`);
-        }
-
-        try{
-            const res = await axios.get(`http://localhost:4000/peers`);
-            peers = res.data;
-            this.connectToPeersFetchedFromBootstrap();
-            console.log(`Connected to peers: ${peers}`);
-        } catch (error) {
-            console.error(`Error obtaining peers: ${error.message}`);
-        }
+    try {
+      await axios.post(`${BOOTSTRAP_ADDRESS}/register`, {
+        address: selfAddress,
+      });
+      console.log(
+        `Registered peer with bootstrap at ${BOOTSTRAP_ADDRESS} as ${selfAddress}`
+      );
+    } catch (error) {
+      console.error(`Error registering peer: ${error.message}`);
     }
+
+    try {
+      const res = await axios.get(`${BOOTSTRAP_ADDRESS}/peers`);
+      peers = res.data;
+      if (peers) {
+        this.connectToPeersFetchedFromBootstrap();
+        console.log(`Connected to peers: ${peers}`);
+      }
+      console.log("skiping no peers");
+    } catch (error) {
+      console.error(`Error obtaining peers: ${error.message}`);
+    }
+  }
 
 
     connectToPeer(peer) {
